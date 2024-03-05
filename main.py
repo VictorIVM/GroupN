@@ -16,7 +16,8 @@ mysql_connection = mysql.connector.connect(
 @app.route('/')
 def home():
     if 'email' in session:
-        return render_template('home.html', email=session['email'])
+        firstname = session.get('firstname')
+        return render_template('home.html', firstname=firstname)
     else:
         return render_template('home.html')
 
@@ -28,34 +29,45 @@ def login():
         password = request.form['password']
 
         cur = mysql_connection.cursor()
-        cur.execute("SELECT email, password FROM voters WHERE email = %s", (email,))
+        cur.execute("SELECT firstname, password FROM voters WHERE email = %s", (email,))
         user = cur.fetchone()
         cur.close()
 
         if user and password == user[1]:
-            session['email'] = user[0]
+            session['email'] = email
+            session['firstname'] = user[0]  # Storing the first name in session
             return redirect(url_for('home'))
         else:
             return render_template("login.html", error='Invalid username or password')
 
     return render_template('login.html')
-@app.route('/register',methods=['get','post'])
+
+@app.route('/register', methods=['GET', 'POST'])
 def register():
-    if request.method=='POST':
-        first_name= request.form['name']
+    if request.method == 'POST':
+        firstname = request.form['firstname']
         email = request.form['email']
-        adm_no=request.form['admno']
+        registration = request.form['registration']
         password = request.form['password']
 
         cur = mysql_connection.cursor()
-        cur.execute("INSERT into voters (firstname, email,admno password) values ('(first_name)', '(email)', "
-                    "'(admno)','(password)' )")
+        query = "INSERT INTO voters (`firstname`, email, registration, password) VALUES (%(first_name)s, %(email)s, %(registration)s, %(password)s)"
+        data = {
+            'first_name': firstname,
+            'email': email,
+            'registration': registration,
+            'password': password
+        }
+        cur.execute(query, data)
+        mysql_connection.commit()
         cur.close()
+        return redirect(url_for('login'))
 
-        return render_template(url_for('loginz'))
-
-    return render_template('registet')
-
+    return render_template('register.html')
+@app.route('/logout')
+def logout():
+    session.clear()
+    return render_template('home.html')
 
 
 
