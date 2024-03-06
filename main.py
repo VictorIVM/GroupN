@@ -100,6 +100,7 @@ def signup():
     if request.method == 'POST':
         first_name = request.form['first_name']
         last_name = request.form['last_name']
+        registration_number = request.form['registration_number']
         email = request.form['email']
         password = request.form['password']
         hashed_password = generate_password_hash(password)  # Hash the password
@@ -113,7 +114,7 @@ def signup():
         admin_role = request.form.get('admin_role', None)
 
         # Create a new user object with the hashed password
-        new_user = User(first_name=first_name, last_name=last_name, email=email, password=hashed_password, role=role,
+        new_user = User(first_name=first_name, last_name=last_name, registration_number=registration_number, email=email, password=hashed_password, role=role,
                         course=course, admin_role=admin_role)
 
         db.session.add(new_user)
