@@ -42,6 +42,7 @@ def login():
 
     return render_template('login.html')
 
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -64,11 +65,12 @@ def register():
         return redirect(url_for('login'))
 
     return render_template('register.html')
+
+
 @app.route('/logout')
 def logout():
     session.clear()
     return render_template('home.html')
-
 
 
 if __name__ == '__main__':
