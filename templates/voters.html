@@ -310,46 +310,65 @@
 
 
 
-    <div class="wrapper">
-
-    <!-- Content Wrapper. Contains page content -->
-    <div class="content-wrapper">
-      <!-- Content Header (Page header) -->
-      <section class="content-header">
-        <h1>
-          Manage Voters
-        </h1>
-      </section>
-      <!-- Main content -->
-      <section class="content">
-
-        <div class="row">
-          <div class="col-xs-12">
-            <div class="box">
-              <div class="box-header with-border">
-                <a href="#addnew" data-toggle="modal" class="btn btn-primary btn-sm btn-flat"><i class="fa fa-plus"></i> New</a>
-              </div>
-              <div class="box-body">
-                <table id="example1" class="table table-bordered">
-                  <thead>
-                    <th>Voters ID</th>
-                    <th>First Name</th>
-                    <th>Last Name</th>
-                    <th>Profile</th>
-                    <th>Actions</th>
-                  </thead>
-                  <tbody>
-
-                  </tbody>
-                </table>
-              </div>
+    <div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header pb-0">
+                    <h6>Manage Voters</h6>
+                </div>
+                <div class="card-body px-0 pt-0 pb-2">
+                    <div class="table-responsive p-0">
+                        <table class="table align-items-center mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Profile</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Student ID</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">First Name</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Last Name</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Course</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Email</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in student_users %}
+                                <tr>
+                                    <td>
+                                        {% if user.picture %}
+                                        <div class="d-flex px-2 py-1">
+                                            <div>
+                                                <img src="{{ url_for('static', filename='uploads/' + user.picture) }}" class="avatar avatar-sm me-3" alt="Profile Picture">
+                                            </div>
+                                        </div>
+                                        {% else %}
+                                        <div class="d-flex px-2 py-1">
+                                            No Picture
+                                        </div>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ user.student_id }}</td>
+                                    <td>{{ user.first_name }}</td>
+                                    <td>{{ user.last_name }}</td>
+                                    <td>{{ user.course }}</td>
+                                    <td>{{ user.email }}</td>
+                                    <td>
+                                        <form method="post" action="{{ url_for('delete_user') }}" onsubmit="return confirm('Are you sure you want to delete this user?')">
+                                            <input type="hidden" name="student_id" value="{{ user.student_id }}">
+                                            <button type="submit" class="btn btn-danger btn-sm btn-flat">Delete</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-          </div>
         </div>
-      </section>
     </div>
+</div>
 
-  </div>
 
 
   <script>

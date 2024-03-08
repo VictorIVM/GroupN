@@ -23,6 +23,8 @@
   <!-- Nepcha Analytics (nepcha.com) -->
   <!-- Nepcha is a easy-to-use web analytics. No cookies and fully compliant with GDPR, CCPA and PECR. -->
   <script defer data-site="YOUR_DOMAIN_HERE" src="https://api.nepcha.com/js/nepcha-analytics.js"></script>
+
+
 </head>
 
 <body class="g-sidenav-show  bg-gray-100">
@@ -309,96 +311,147 @@
 
 
 
-    <div class="wrapper">
-
-
-  <!-- Content Wrapper. Contains page content -->
-  <div class="content-wrapper">
-    <!-- Content Header (Page header) -->
-    <section class="content-header">
-      <h1>
-        Manage Candidates
-      </h1>
-    </section>
-    <!-- Main content -->
-    <section class="content">
-      <div class="row">
-        <div class="col-xs-12">
-          <div class="box">
-            <div class="box-header with-border">
-              <a href="#addnew" data-toggle="modal" class="btn btn-primary btn-sm btn-flat"><i class="fa fa-plus"></i> New</a>
+    <div class="container-fluid py-4">
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+            <h1>
+                Manage Candidates
+            </h1>
+        </section>
+        <!-- Main content -->
+        <section class="content">
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="card">
+                        <div class="card-header with-border">
+                            <a href="#" id="newCandidateButton" class="btn btn-primary btn-sm btn-flat"><i class="fa fa-plus"></i> New</a>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th class="hidden"></th>
+                                            <th>Position</th>
+                                            <th>Profile</th>
+                                            <th>First Name</th>
+                                            <th>Last Name</th>
+                                            <th>student_id</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% set counter = 1 %}
+                                        {% for candidate in candidates %}
+                                        <tr>
+                                            <td>{{ loop.index }}</td>
+                                            <td>{{ candidate.position }}</td>
+                                            <td><img src="{{ url_for('static', filename='uploads/' + candidate.profile) }}" class="avatar avatar-sm me-3" alt="Profile Picture"></td>
+                                            <td>{{ candidate.first_name }}</td>
+                                            <td>{{ candidate.last_name }}</td>
+                                            <td>{{ candidate.student_id }}</td>
+                                            <td>
+                                                <form action="{{ url_for('delete_candidate') }}" method="post">
+                                                    <input type="hidden" name="candidate_id" value="{{ candidate.id }}">
+                                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this candidate?')">Delete</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="box-body">
-              <table id="example1" class="table table-bordered">
-                <thead>
-                  <th class="hidden"></th>
-                  <th>Position</th>
-                  <th>Profile</th>
-                  <th>First Name</th>
-                  <th>Last Name</th>
-                  <th>Platform</th>
-                  <th>Actions</th>
-                </thead>
-                <tbody>
-
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  </div>
+        </section>
+    </div>
 </div>
 
+
+
+
+
+    <div id="addNewCandidateModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="{{ url_for('add_candidate') }}" enctype="multipart/form-data"s>
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Add New Candidate</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="student_id">student_id:</label>
+                        <input type="text" class="form-control" id="student_id" name="student_id" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="position">Position:</label>
+    <select class="form-control" id="position" name="position" required>
+        <option value="">Select Position</option>
+        {% for position in positions %}
+            <option value="{{ position.description }}">{{ position.description }}</option>
+        {% endfor %}
+    </select>
+
+                    </div>
+                    <div class="form-group">
+                        <label for="profile">Profile:</label>
+                      <div class="mb-3">
+        <input type="file" class="form-control" id="profile" name="profile" accept="image/*" aria-label="Picture" aria-describedby="picture-addon">
+    </div>
+                    </div>
+                    <div class="form-group">
+    <label for="first_name">First Name:</label>
+    <input type="text" class="form-control" id="first_name" name="first_name" required>
+    <input type="hidden" id="first_name_hidden" name="first_name_hidden">
+</div>
+<div class="form-group">
+    <label for="last_name">Last Name:</label>
+    <input type="text" class="form-control" id="last_name" name="last_name" required>
+    <input type="hidden" id="last_name_hidden" name="last_name_hidden">
+</div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Add</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+    <!-- Add this script in your HTML -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-$(function(){
-  $(document).on('click', '.edit', function(e){
-    e.preventDefault();
-    $('#edit').modal('show');
-    var id = $(this).data('id');
-    getRow(id);
-  });
-
-  $(document).on('click', '.delete', function(e){
-    e.preventDefault();
-    $('#delete').modal('show');
-    var id = $(this).data('id');
-    getRow(id);
-  });
-
-  $(document).on('click', '.photo', function(e){
-    e.preventDefault();
-    var id = $(this).data('id');
-    getRow(id);
-  });
-
-  $(document).on('click', '.platform', function(e){
-    e.preventDefault();
-    var id = $(this).data('id');
-    getRow(id);
-  });
-
+$(document).ready(function() {
+    $('#student_id').on('input', function() {
+        var studentId = $(this).val();
+        $.ajax({
+            url: '/get_user_details',
+            method: 'POST',
+            data: { student_id: studentId },
+            success: function(response) {
+                $('#first_name').val(response.first_name);
+                $('#first_name_hidden').val(response.first_name);
+                $('#last_name').val(response.last_name);
+                $('#last_name_hidden').val(response.last_name);
+            },
+            error: function(xhr, status, error) {
+                console.error(error);
+            }
+        });
+    });
 });
-
-function getRow(id){
-  $.ajax({
-    type: 'POST',
-    url: 'candidates_row.php',
-    data: {id:id},
-    dataType: 'json',
-    success: function(response){
-      $('.id').val(response.canid);
-      $('#edit_firstname').val(response.firstname);
-      $('#edit_lastname').val(response.lastname);
-      $('#posselect').val(response.position_id).html(response.description);
-      $('#edit_platform').val(response.platform);
-      $('.fullname').html(response.firstname+' '+response.lastname);
-      $('#desc').html(response.platform);
-    }
-  });
-}
 </script>
+
+
+
 
 
 
@@ -646,6 +699,25 @@ function getRow(id){
   <script async defer src="https://buttons.github.io/buttons.js"></script>
   <!-- Control Center for Soft Dashboard: parallax effects, scripts for the example pages etc -->
   <script src="{{ url_for('static', filename='js/soft-ui-dashboard.min.js') }}"></script>
+
+
+    <!-- JavaScript Files -->
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Bootstrap JavaScript -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+
+<script>
+    $(document).ready(function(){
+        $('#newCandidateButton').click(function(){
+            $('#addNewCandidateModal').modal('show');
+        });
+    });
+</script>
+
+</main>
 </body>
 
 </html>

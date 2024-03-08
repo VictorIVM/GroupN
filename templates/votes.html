@@ -310,45 +310,127 @@
 
 
 
-    <div class="wrapper">
 
-  <!-- Content Wrapper. Contains page content -->
-  <div class="content-wrapper">
-    <!-- Content Header (Page header) -->
-    <section class="content-header">
-      <h1>
-        Manage All Votes
-      </h1>
-    </section>
-    <!-- Main content -->
-    <section class="content">
+   <!-- Add New Position Modal -->
+<div id="addPositionModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="{{ url_for('set_position_time') }}">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Add New Position</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="position_id">Position:</label>
+    <select class="form-control" id="position_id" name="position_id" required>
+        <option value="">Select Position</option>
+        {% for position in positions %}
+            <option value="{{ position.id }}">{{ position.description }}</option>
+        {% endfor %}
+    </select>
 
-      <div class="row">
-        <div class="col-xs-12">
-          <div class="box">
-            <div class="box-header with-border">
-              <a href="#reset" data-toggle="modal" class="btn btn-danger btn-sm btn-flat"><i class="fa fa-refresh"></i> Reset</a>
-            </div>
-            <div class="box-body">
-              <table id="example1" class="table table-bordered">
-                <thead>
-                  <th class="hidden"></th>
-                  <th>Position</th>
-                  <th>Candidate's Name</th>
-                  <th>Voter's Name</th>
-                </thead>
-                <tbody>
-
-                </tbody>
-              </table>
-            </div>
-          </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="starting_time">Starting Time:</label>
+                        <input type="datetime-local" class="form-control" id="starting_time" name="starting_time" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="ending_time">Ending Time:</label>
+                        <input type="datetime-local" class="form-control" id="ending_time" name="ending_time" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Set Time</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </form>
         </div>
-      </div>
-    </section>
-  </div>
+    </div>
 </div>
 
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header pb-0">
+                    <h6>Manage All Votes</h6>
+                </div>
+                <div class="card-body">
+                    <button id="newvotetime" class="btn btn-primary btn-sm btn-flat">Add New Position Time</button>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Position</th>
+                                    <th>Starting Time</th>
+                                    <th>Ending Time</th>
+                                    <th>Remaining Time</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for position in positions %}
+                                <tr>
+                                    <td>{{ position.description }}</td>
+                                    <td>{{ position.starting_time }}</td>
+                                    <td>{{ position.ending_time }}</td>
+                                    <td id="remaining_time_{{ loop.index }}"></td>
+                                    <td>{{ position.status }}</td>
+                                    <td>
+                                        {% if position.ending_time %}
+                                        <form method="post" action="{{ url_for('delete_position_time') }}" onsubmit="return confirm('Are you sure you want to delete this vote?')">
+                                            <input type="hidden" name="position_id" value="{{ position.id }}">
+                                            <button type="submit" class="btn btn-danger btn-sm btn-flat">Delete Time</button>
+                                        </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript Files -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+    // Update remaining time every second
+    function updateRemainingTime() {
+        {% for position in positions %}
+        var remainingTimeElement = document.getElementById("remaining_time_{{ loop.index }}");
+        var endingTime = new Date("{{ position.ending_time }}");
+        var currentTime = new Date();
+        var remainingTime = Math.max((endingTime - currentTime) / 1000, 0);
+
+        var days = Math.floor(remainingTime / (24 * 3600));
+        remainingTime %= (24 * 3600);
+        var hours = Math.floor(remainingTime / 3600);
+        remainingTime %= 3600;
+        var minutes = Math.floor(remainingTime / 60);
+        var seconds = Math.floor(remainingTime % 60);
+
+        remainingTimeElement.innerHTML = days + " days, " + hours + " hours, " + minutes + " minutes, " + seconds + " seconds";
+        {% endfor %}
+    }
+
+    // Update remaining time immediately and then every second
+    updateRemainingTime();
+    setInterval(updateRemainingTime, 1000);
+
+    $(document).ready(function(){
+        $('#newvotetime').click(function(){
+            $('#addPositionModal').modal('show');
+        });
+    });
+</script>
 
 
 
@@ -597,6 +679,7 @@
   <script async defer src="https://buttons.github.io/buttons.js"></script>
   <!-- Control Center for Soft Dashboard: parallax effects, scripts for the example pages etc -->
   <script src="{{ url_for('static', filename='js/soft-ui-dashboard.min.js') }}"></script>
+  </main>
 </body>
 
 </html>
