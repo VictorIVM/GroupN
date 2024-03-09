@@ -14,12 +14,12 @@ mysql_connection = mysql.connector.connect(
 
 
 @app.route('/')
-def home():
+def dashboard():
     if 'email' in session:
         firstname = session.get('firstname')
-        return render_template('home.html', firstname=firstname)
+        return render_template('welcome.html', firstname=firstname)
     else:
-        return render_template('home.html')
+        return render_template('welcome.html')
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -36,7 +36,7 @@ def login():
         if user and password == user[1]:
             session['email'] = email
             session['firstname'] = user[0]  # Storing the first name in session
-            return redirect(url_for('home'))
+            return redirect(url_for('dashboard'))
         else:
             return render_template("login.html", error='Invalid username or password')
 
@@ -70,7 +70,7 @@ def register():
 @app.route('/logout')
 def logout():
     session.clear()
-    return render_template('home.html')
+    return render_template('welcome.html')
 
 
 if __name__ == '__main__':
