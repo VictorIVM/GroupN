@@ -7,7 +7,6 @@ CREATE TABLE `registrations` (
   UNIQUE KEY `registration_number` (`registration_number`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-
 CREATE TABLE users (
   id INT AUTO_INCREMENT PRIMARY KEY,
   first_name VARCHAR(50) NOT NULL,
@@ -22,7 +21,6 @@ CREATE TABLE users (
   UNIQUE (email),
   UNIQUE (student_id)
 );
-
 
 CREATE TABLE `nominations` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -39,8 +37,6 @@ CREATE TABLE `nominations` (
 CREATE TABLE positions (
     id INT AUTO_INCREMENT PRIMARY KEY,
     description VARCHAR(255) NOT NULL,
-    starting_time DATETIME NOT NULL,
-    ending_time DATETIME NOT NULL
 );
 
 CREATE TABLE candidates (
@@ -58,4 +54,26 @@ CREATE TABLE position_time (
     starting_time DATETIME,
     ending_time DATETIME,
     FOREIGN KEY (position_id) REFERENCES positions(id)
+);
+
+CREATE TABLE IF NOT EXISTS votes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    position_id INT NOT NULL,
+    candidate_id INT NOT NULL,
+    voted_by VARCHAR(255) NOT NULL,
+    voted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (position_id) REFERENCES positions(id),
+    FOREIGN KEY (candidate_id) REFERENCES candidates(id),
+    FOREIGN KEY (voted_by) REFERENCES users(student_id)
+);
+
+CREATE TABLE ballot (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    position_id INT,
+    candidate_id INT,
+    voter_id INT,
+    voted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_position FOREIGN KEY (position_id) REFERENCES positions(id),
+    CONSTRAINT fk_candidate FOREIGN KEY (candidate_id) REFERENCES candidates(id),
+    CONSTRAINT fk_voter FOREIGN KEY (voter_id) REFERENCES users(id)
 );
