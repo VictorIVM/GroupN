@@ -89,7 +89,18 @@
                   <p class="mb-0">Enter your School Email and password to sign in</p>
                 </div>
                 <div class="card-body">
-                  <form role="form" action="{{ url_for('signin_student') }}" method="post">
+                  <div class="card-body">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+                  <form role="form" action="{{ url_for('signin_student') }}" method="post" enctype="multipart/form-data">
   <label>Email</label>
   <div class="mb-3">
     <input type="email" class="form-control" name="email" placeholder="School Email" aria-label="Email" aria-describedby="email-addon">
@@ -97,6 +108,10 @@
   <label>Password</label>
   <div class="mb-3">
     <input type="password" class="form-control" name="password" placeholder="Password" aria-label="Password" aria-describedby="password-addon">
+  </div>
+  <div class="mb-3">
+    <label>Upload Your Picture</label>
+    <input type="file" class="form-control" name="picture" accept="image/*" required>
   </div>
   <div class="form-check form-switch">
     <input class="form-check-input" type="checkbox" id="rememberMe" checked="">
@@ -106,6 +121,7 @@
     <button type="submit" class="btn bg-gradient-info w-100 mt-4 mb-0">Sign in</button>
   </div>
 </form>
+                  </div>
                 </div>
 
               </div>
