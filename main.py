@@ -6,8 +6,12 @@ import mysql.connector
 import os
 import random
 import string
+import cv2
+import numpy as np  # Import numpy for array operations
 
 app = Flask(__name__)
+
+face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
 # Setting up MySQL database
 app.config['MYSQL_HOST'] = 'localhost'
@@ -46,6 +50,34 @@ class User:
 
 @app.route('/')
 def index():
+    if 'user' in session:
+        return redirect(url_for('dashboard_student'))
+
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        picture = request.files['picture']  # Get the uploaded file object
+
+        query = "SELECT * FROM users WHERE email = %s"
+        cursor.execute(query, (email,))
+        user = cursor.fetchone()
+
+        if user and check_password_hash(user['password'], password) and user['role'] == 'student':
+            # Perform face recognition
+            img_data = np.fromstring(picture.read(), np.uint8)  # Read image data from the file object
+            img = cv2.imdecode(img_data, cv2.IMREAD_COLOR)  # Decode the image data
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # Convert to grayscale
+            faces = face_cascade.detectMultiScale(gray, 1.3, 5)  # Detect faces
+
+            if len(faces) == 1:  # Assuming only one face is detected
+                # Face recognized, allow sign-in
+                session['user'] = email
+                return redirect(url_for('dashboard_student'))
+            else:
+                flash('Face recognition failed. Please try again.', 'error')
+        else:
+            flash('Invalid username or password', 'error')
+
     return render_template('index.html')
 
 
@@ -76,23 +108,31 @@ def signin():
 
 @app.route('/signin_student', methods=['GET', 'POST'])
 def signin_student():
-    if 'user' in session:  # If user is already signed in, redirect to dashboard
+    if 'user' in session:
         return redirect(url_for('dashboard_student'))
 
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
+        picture = request.files['picture']  # Get the uploaded file object
 
-        # Query the User model to find a user with the provided email
         query = "SELECT * FROM users WHERE email = %s"
         cursor.execute(query, (email,))
         user = cursor.fetchone()
 
         if user and check_password_hash(user['password'], password) and user['role'] == 'student':
-            # Check if the user exists and the password is correct
-            session['user'] = email  # Store user's email in session
-            flash('You have been logged in!', 'success')
-            return redirect(url_for('dashboard_student'))  # Redirect to dashboard after successful sign-in
+            # Perform face recognition
+            img_data = np.fromstring(picture.read(), np.uint8)  # Read image data from the file object
+            img = cv2.imdecode(img_data, cv2.IMREAD_COLOR)  # Decode the image data
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # Convert to grayscale
+            faces = face_cascade.detectMultiScale(gray, 1.3, 5)  # Detect faces
+
+            if len(faces) == 1:  # Assuming only one face is detected
+                # Face recognized, allow sign-in
+                session['user'] = email
+                return redirect(url_for('dashboard_student'))
+            else:
+                flash('Face recognition failed. Please try again.', 'error')
         else:
             flash('Invalid username or password', 'error')
 
