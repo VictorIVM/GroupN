@@ -7,13 +7,12 @@ import os
 import random
 import string
 
-
 app = Flask(__name__)
 
 # Setting up MySQL database
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'mysqlpassword'
+app.config['MYSQL_PASSWORD'] = ''
 app.config['MYSQL_DB'] = 'voting_db'
 
 mysql = mysql.connector.connect(
@@ -23,6 +22,7 @@ mysql = mysql.connector.connect(
     database=app.config['MYSQL_DB']
 )
 cursor = mysql.cursor(dictionary=True)
+
 
 # Define the User model
 class User:
@@ -158,7 +158,7 @@ def delete_user():
 
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
-    if ('user' in session):
+    if 'user' in session:
         # Fetch positions from the database
         cursor.execute("SELECT positions.id, positions.description FROM positions")
         positions = cursor.fetchall()
@@ -177,8 +177,7 @@ def dashboard():
 
 @app.route('/dashboard_student', methods=['GET', 'POST'])
 def dashboard_student():
-    if ('user' in session):
-
+    if 'user' in session:
         return render_template('dashboard_student.html')
     return redirect(url_for('signin_student'))
 
@@ -200,7 +199,8 @@ def ballot():
             user_id = user['id']
             if request.method == 'GET':
                 # Fetch positions and candidates from the database
-                cursor.execute("SELECT positions.*, position_time.starting_time, position_time.ending_time FROM positions LEFT JOIN position_time ON positions.id = position_time.position_id")
+                cursor.execute(
+                    "SELECT positions.*, position_time.starting_time, position_time.ending_time FROM positions LEFT JOIN position_time ON positions.id = position_time.position_id")
                 positions = cursor.fetchall()
 
                 candidates_by_position = {}
@@ -229,12 +229,15 @@ def ballot():
                     candidates_by_position[position['id']] = cursor.fetchall()
 
                     # Fetch voted candidate's information for each position
-                    cursor.execute("SELECT candidates.*, ballot.voter_id FROM candidates INNER JOIN ballot ON candidates.id = ballot.candidate_id WHERE ballot.position_id = %s AND ballot.voter_id = %s", (position['id'], user_id))
+                    cursor.execute(
+                        "SELECT candidates.*, ballot.voter_id FROM candidates INNER JOIN ballot ON candidates.id = ballot.candidate_id WHERE ballot.position_id = %s AND ballot.voter_id = %s",
+                        (position['id'], user_id))
                     voted_candidate = cursor.fetchone()
                     if voted_candidate:
                         voted_candidates[position['id']] = voted_candidate
 
-                return render_template('ballot.html', positions=positions, candidates_by_position=candidates_by_position, voted_candidates=voted_candidates)
+                return render_template('ballot.html', positions=positions,
+                                       candidates_by_position=candidates_by_position, voted_candidates=voted_candidates)
             elif request.method == 'POST':
                 # Handle form submission for casting votes
                 position_id = request.form['position_id']
@@ -256,8 +259,6 @@ def ballot():
                 return redirect(url_for('ballot'))
     else:
         return redirect(url_for('signin'))
-
-
 
 
 # Route to get candidates for a particular position via AJAX
@@ -306,6 +307,7 @@ def cast_vote():
         else:
             return jsonify({'status': 'error', 'message': 'User not found'})
 
+
 # Modify the ballot.html to display positions and candidates and handle voting process via AJAX
 
 
@@ -335,8 +337,6 @@ def votes():
             position['status'] = 'Not Set'
 
     return render_template('votes.html', positions=positions)
-
-
 
 
 @app.route('/delete_position_time', methods=['POST'])
@@ -374,7 +374,8 @@ def set_position_time():
 @app.route('/voters', methods=['GET', 'POST'])
 def voters():
     if ('user' in session):
-        cursor.execute("SELECT student_id, first_name, last_name, course, email, picture FROM users WHERE role = 'student'")
+        cursor.execute(
+            "SELECT student_id, first_name, last_name, course, email, picture FROM users WHERE role = 'student'")
         student_users = cursor.fetchall()
         return render_template('voters.html', student_users=student_users)
     return redirect(url_for('signin'))
@@ -401,7 +402,7 @@ def tally_student():
 
 @app.route('/candidates', methods=['GET', 'POST'])
 def candidates():
-    if ('user' in session):
+    if 'user' in session:
         # Fetch positions from the database
         cursor.execute("SELECT * FROM positions")
         positions = cursor.fetchall()
